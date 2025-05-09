@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landon Bloodworth | Motion Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .container {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: perspective 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2vmin;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .grid-item {
+            width: 20vmin;
+            height: 20vmin;
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: visible;
+            background: #111;
+            filter: blur(2px);
+            opacity: 0.92;
+            border-radius: 8px;
+            transition:
+                transform 0.6s cubic-bezier(0.33, 1, 0.68, 1),
+                filter 0.4s ease,
+                opacity 0.4s ease,
+                box-shadow 0.4s ease;
+            will-change: transform, filter, opacity;
+            pointer-events: auto;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .grid-item.expanded {
+            transition: 
+                width 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+                height 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+                transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1000 !important;
+            position: fixed !important;
+            width: 45vmin !important;
+            height: 45vmin !important;
+        }
+
+        .grid-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translateZ(0.1px) scale(1.01);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .grid-item:hover {
+            filter: blur(0) !important;
+            opacity: 1 !important;
+            transform: translateZ(70px) scale(1.35) !important;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3) !important;
+            z-index: 100;
+            cursor: pointer;
+            transition:
+                transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1),
+                filter 0.2s ease,
+                opacity 0.2s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .grid-item:hover .description {
+            opacity: 1;
+            transform: translateY(-10%) scaleY(1) translateZ(20px);
+            z-index: 1;
+        }
+
+        .description {
+            position: absolute;
+            width: 100%;
+            padding: 0.75rem;
+            color: white;
+            font-size: 1.6vmin;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(0%) scaleY(0);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.5, 1), opacity 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+            background: rgba(0,0,0,0.9);
+            border-radius: 0 0 8px 8px;
+            text-align: center;
+            line-height: 1.4;
+            font-weight: 350;
+            backdrop-filter: blur(3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            top: 100%;
+            transform-origin: top center;
+            padding-top: 1.05rem;
+            z-index: 1;
+        }
+
+        .grid-item.bottom-row .description {
+            top: auto;
+            bottom: 100%;
+            transform: translateY(100%) scaleY(0) translateZ(-10px);
+            transform-origin: bottom center;
+            border-radius: 8px 8px 0 0;
+            border-top: none;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            z-index: 0;
+        }
+
+        .grid-item.bottom-row:hover .description {
+            transform: translateY(0%) scaleY(1) translateZ(-10px);
+        }
+
+        .grid-item:hover ~ .grid-item {
+            filter: blur(3px);
+            opacity: 0.75 !important;
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.7));
+            mix-blend-mode: multiply;
+            transition: opacity 0.6s ease;
+        }
+
+        .logo {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+        }
+
+        .logo-main {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.8px;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: linear-gradient(
+                45deg,
+                #ffffff 0%,
+                #dddddd 25%,
+                #ffffff 50%,
+                #dddddd 75%,
+                #ffffff 100%
+            );
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 10s linear infinite;
+            text-shadow: 0 3px 5px rgba(0,0,0,0.3);
+        }
+
+        .logo-subtitle {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #ddd;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            margin-top: 0.2rem;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+        }
+
+        .year {
+            opacity: 0.5;
+            font-weight: 300;
+            display: block;
+            margin-top: 0.4rem;
+        }
+
+        .about-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            max-width: 300px;
+            z-index: 1000;
+            color: #fff;
+            pointer-events: none;
+        }
+
+        .about-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+            font-weight: 300;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            backdrop-filter: blur(3px);
+        }
+
+        .contact-button {
+            pointer-events: auto;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 400;
+            backdrop-filter: blur(5px);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .contact-button:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .grid-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .grid-mask.active {
+            opacity: 1;
+        }
+
+        @keyframes gradientFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <div class="logo-main">Landon Bloodworth</div>
+        <div class="logo-subtitle">motion designer</div>
+    </div>
+
+    <div class="about-container">
+        <p class="about-text">
+            Motion and visual identity designer based in Louisville, Kentucky. Bachelors of Fine Arts in Graphic Design from the University of Louisville’s Hite School of Art and Design. Currently doing motion work for Alani Nu, Prime Hydration, and Lunchly under the Congo Brands umbrella.
+        </p>
+        <a href="mailto:design@landonbloodworth.com" class="contact-button">
+            Contact
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="grid-mask" id="gridMask"></div>
+        <div class="grid" id="mainGrid"></div>
+    </div>
+    <div class="gradient-overlay"></div>
+
+    <script>
+        const grid = document.getElementById('mainGrid');
+        const gridMask = document.getElementById('gridMask');
+        const numVideos = 16;
+        let items = [];
+        let animating = true;
+        let isGyroActive = false;
+        let expandedItem = null;
+        const descriptions = [
+            "Lunchly type animation exploration<span class='year'>2024</span>",
+            "Prime Energy Cherry Limeade type animation<span class='year'>2025</span>",
+            "Alani Nu Watermelon Wave Giphy animation<span class='year'>2025</span>",
+            "Alani Nu Blue Slush type animation<span class='year'>2025</span>",
+            "Alani Nu Blue Slush Giphy animation<span class='year'>2025</span>",
+            "Alani Nu Blue Slush sticker animation<span class='year'>2025</span>",
+            "Atomic Sound Club animation<span class='year'>2024</span>",
+            "Prime Energy Black Friday callout animation<span class='year'>2024</span>",
+            "Prime Energy Black Friday type animation<span class='year'>2024</span>",
+            "Alani Nu Sherbet Swirl type animation<span class='year'>2025</span>",
+            "Lunchly character animation<span class='year'>2024</span>",
+            "Atomic Sound Club animation<span class='year'>2024</span>",
+            "Prime Hydration Sournova character animation<span class='year'>2025</span>",
+            "Prime Hydration Sournova asset animation<span class='year'>2025</span>",
+            "Alani Nu Watermelon Wave Giphy animation<span class='year'>2025</span>",
+            "Atomic Sound Club animation<span class='year'>2024</span>"
+        ];
+
+        // Create grid items in order
+        for (let i = 0; i < numVideos; i++) {
+            const item = document.createElement('div');
+            item.className = 'grid-item' + (i >= 12 ? ' bottom-row' : ''); // Last 4 items are bottom row
+
+            const video = document.createElement('video');
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.src = `${i + 1}.mp4`; // Sequential numbering
+            video.style.transform = 'translateZ(0)';
+
+            const desc = document.createElement('div');
+            desc.className = 'description';
+            desc.innerHTML = descriptions[i];
+
+            item.appendChild(video);
+            item.appendChild(desc);
+            grid.appendChild(item);
+            items.push(item);
+        }
+
+        // Physics-based float animation
+        function animate() {
+            if (!animating) return;
+
+            const time = Date.now() * 0.001;
+            items.forEach((item, index) => {
+                const offset = index * 0.3;
+                const z = Math.cos(time * 0.8 + offset) * 20;
+                const scale = 0.97 + Math.abs(Math.sin(time + offset)) * 0.03;
+
+                item.style.transform = `translateZ(${z}px) scale(${scale})`;
+                item.style.filter = `blur(${1.5 - Math.abs(z/12)}px)`;
+                item.style.opacity = (0.9 + Math.abs(z/200)).toFixed(2);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Expand/contract functionality
+        function expandItem(item) {
+            animating = false;
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // Store original parent and position
+            item.originalStyles = {
+                parent: item.parentNode,
+                width: item.style.width,
+                height: item.style.height,
+                position: item.style.position,
+                left: item.style.left,
+                top: item.style.top,
+                margin: item.style.margin,
+                transition: item.style.transition,
+                zIndex: item.style.zIndex,
+                videoFilter: item.querySelector('video').style.filter,
+                borderRadius: item.style.borderRadius
+            };
+
+            // Move item to container level
+            container.appendChild(item);
+
+            // Calculate 45% size of viewport (25% smaller than before)
+            const size = Math.min(containerRect.width, containerRect.height) * 0.45;
+            const targetLeft = (containerRect.width - size) / 2;
+            const targetTop = (containerRect.height - size) / 2;
+            
+            // Apply expanded styles
+            item.classList.add('expanded');
+            item.style.position = 'fixed';
+            item.style.width = `${size}px`;
+            item.style.height = `${size}px`;
+            item.style.left = `${targetLeft}px`;
+            item.style.top = `${targetTop}px`;
+            item.style.margin = '0';
+            item.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+            item.style.zIndex = '1000';
+            item.style.borderRadius = '12px';
+            item.querySelector('video').style.filter = 'brightness(1.1) saturate(1.1)';
+            
+            // Darken background
+            gridMask.classList.add('active');
+            document.querySelector('.gradient-overlay').style.opacity = '0';
+            
+            // Hide other grid items
+            items.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.style.opacity = '0';
+                    otherItem.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        function contractItem(item) {
+            animating = true;
+            
+            // Move item back to original parent
+            item.originalStyles.parent.appendChild(item);
+
+            // Restore original styles
+            item.classList.remove('expanded');
+            Object.assign(item.style, item.originalStyles);
+            item.querySelector('video').style.filter = item.originalStyles.videoFilter;
+            item.style.borderRadius = item.originalStyles.borderRadius;
+            
+            // Restore other items
+            gridMask.classList.remove('active');
+            document.querySelector('.gradient-overlay').style.opacity = '1';
+            items.forEach(otherItem => {
+                otherItem.style.opacity = '';
+                otherItem.style.pointerEvents = '';
+            });
+
+            animate();
+        }
+
+        // Item interaction handlers
+        items.forEach((item) => {
+            const originalTransform = item.style.transform;
+            let lastHoveredItem = null;
+
+            function handleActivation(e) {
+                if (expandedItem) {
+                    if (expandedItem === item) {
+                        contractItem(item);
+                        expandedItem = null;
+                    }
+                    return;
+                }
+
+                expandItem(item);
+                expandedItem = item;
+                e.preventDefault();
+            }
+
+            item.addEventListener('click', handleActivation);
+            item.addEventListener('touchstart', handleActivation);
+
+            item.addEventListener('mouseenter', () => {
+                if (expandedItem) return;
+                animating = false;
+                item.style.transform = `translateZ(70px) scale(1.35)`;
+                item.style.filter = 'blur(0)';
+                item.style.opacity = '1';
+                document.querySelector('.container').style.perspective = '1000px';
+
+                const description = item.querySelector('.description');
+                description.style.transform = item.classList.contains('bottom-row') 
+                    ? 'translateY(100%) scaleY(0) translateZ(-10px)'
+                    : 'translateY(0%) scaleY(0)';
+                description.style.opacity = '0';
+                void description.offsetWidth;
+
+                if (lastHoveredItem && lastHoveredItem !== item) {
+                    const lastDescription = lastHoveredItem.querySelector('.description');
+                    if (lastDescription) {
+                        lastDescription.style.transform = item.classList.contains('bottom-row') 
+                            ? 'translateY(100%) scaleY(0) translateZ(-10px)'
+                            : 'translateY(0%) scaleY(0)';
+                        lastDescription.style.opacity = '0';
+                    }
+                }
+                lastHoveredItem = item;
+
+                description.style.transform = item.classList.contains('bottom-row') 
+                    ? 'translateY(0%) scaleY(1) translateZ(-10px)'
+                    : 'translateY(-10%) scaleY(1) translateZ(20px)';
+                description.style.opacity = '1';
+            });
+
+            item.addEventListener('mouseleave', () => {
+                if (expandedItem) return;
+                animating = true;
+                item.style.transform = originalTransform;
+                document.querySelector('.container').style.perspective = '1200px';
+                animate();
+                const description = item.querySelector('.description');
+                description.style.transform = item.classList.contains('bottom-row') 
+                    ? 'translateY(100%) scaleY(0) translateZ(-10px)'
+                    : 'translateY(0%) scaleY(0)';
+                description.style.opacity = '0';
+                lastHoveredItem = null;
+            });
+        });
+
+        // Start animation
+        animate();
+
+        // Gyroscope handling
+        function handleOrientation(event) {
+            if (expandedItem) return;
+            if (event.beta === null || event.gamma === null) return;
+            isGyroActive = true;
+
+            const sensitivity = 0.3;
+            const rotateX = event.beta * sensitivity;
+            const rotateY = -event.gamma * sensitivity;
+
+            grid.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        // Device orientation permissions
+        if (window.DeviceOrientationEvent) {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                const requestPermission = () => {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('deviceorientation', handleOrientation);
+                            }
+                        })
+                        .catch(console.error);
+                    document.body.removeEventListener('click', requestPermission);
+                };
+                document.body.addEventListener('click', requestPermission);
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        // Mouse movement interaction
+        document.addEventListener('mousemove', (e) => {
+            if (expandedItem) return;
+            if (isGyroActive) return;
+
+            const x = (window.innerWidth/2 - e.clientX)/70;
+            const y = (window.innerHeight/2 - e.clientY)/70;
+            grid.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+
+        document.body.addEventListener('mouseleave', () => {
+            grid.style.transform = 'rotateX(0) rotateY(0)';
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (expandedItem) {
+                const container = document.querySelector('.container');
+                const containerRect = container.getBoundingClientRect();
+                const size = Math.min(containerRect.width, containerRect.height) * 0.45;
+                const targetLeft = (containerRect.width - size) / 2;
+                const targetTop = (containerRect.height - size) / 2;
+                
+                expandedItem.style.width = `${size}px`;
+                expandedItem.style.height = `${size}px`;
+                expandedItem.style.left = `${targetLeft}px`;
+                expandedItem.style.top = `${targetTop}px`;
+            }
+        });
+    </script>
+</body>
+</html>
